@@ -9,7 +9,7 @@ void testApp::setup(){
 	
 	font.loadFont("DIN.otf", 64);
 	
-	//serial.listDevices();
+	serial.listDevices();
 	//vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 		
 //	serial.setup(9, 9600); //open the first device

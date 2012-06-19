@@ -34,7 +34,7 @@
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
             BuildableName = "Journey2-readSerial.app"
             BlueprintName = "Journey2-readSerial"
-            ReferencedContainer = "container:Journey2-readSerial.xcodeproj">
+            ReferencedContainer = "container:Journey2-filterSerial.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -52,7 +52,7 @@
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
             BuildableName = "Journey2-readSerial.app"
             BlueprintName = "Journey2-readSerial"
-            ReferencedContainer = "container:Journey2-readSerial.xcodeproj">
+            ReferencedContainer = "container:Journey2-filterSerial.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
