@@ -177,18 +177,20 @@ void testApp::update(){
 
 		if (msg.getAddress() == "/capture")
 		{
-			data << video;
-			if (data.hasData()) {
-				triangulate();
-				seperate();
-				data.saveDataSet("scan");
-				ofxOscMessage cheer;
-				cheer.setAddress("/complete");
-				tx.sendMessage(cheer);
-			} else {
-				ofxOscMessage request;
-				request.setAddress("/request");
-				tx.sendMessage(request);
+			if (!data.hasData()) {
+				data << video;
+				if (data.hasData()) {
+					triangulate();
+					seperate();
+					data.saveDataSet("scan");
+					ofxOscMessage cheer;
+					cheer.setAddress("/complete");
+					tx.sendMessage(cheer);
+				} else {
+					ofxOscMessage request;
+					request.setAddress("/request");
+					tx.sendMessage(request);
+				}
 			}
 		}
 
