@@ -78,10 +78,12 @@ void testApp::setup(){
 	
 	this->threshold = 0.1;
 	this->triangulate();
-	this->seperate();
 	
 	this->offset = ofVec3f(0.07, 0.33, 0.76);
-	this->rotation = ofVec3f(-34,4,11);
+	this->rotation = ofVec3f(-43,14,9);
+	this->makeTransform();
+	
+	this->seperate();
 }
 
 //--------------------------------------------------------------
@@ -96,6 +98,15 @@ void testApp::triangulate(){
 }
 
 //--------------------------------------------------------------
+void testApp::makeTransform() {
+	transform.makeIdentityMatrix();
+	transform.postMultRotate(rotation.x, 1, 0, 0);
+	transform.postMultRotate(rotation.z, 0, 0, 1);
+	transform.postMultRotate(rotation.y, 0, 1, 0);
+	transform.preMultTranslate(offset);
+}
+
+//--------------------------------------------------------------
 void testApp::seperate(){
 	if (data.getDataSet().getHasData()) {
 		for (int i=0; i<3; i++)
@@ -106,16 +117,23 @@ void testApp::seperate(){
 		for (it = data.getDataSet().begin(); it != data.getDataSet().end(); ++it) {
 			ofxGraycode::DataSet::const_iterator::reference p(*it);
 			if (p.active) {
-				float z = mesh.getVertex(iPoint++).z;
+				ofVec3f xyz = mesh.getVertex(iPoint++) * transform;	
+				float z = xyz.z;
 				
-				unsigned int index = (z + 0.03f) / 0.06f;
+				float findex = (z / (-0.19f)) * 3.0f;
+				unsigned int index = findex;
+				if (iPoint % 20 == 0)
+					cout << "xyz: " << xyz  << ", index:" << index << ", findex:" << findex << endl;
+				
 				if (index < 3)
 					slide[index].getPixels()[p.projector] = 255;
 			}
 		}
 		
-		for (int i=0; i<3; i++)
+		for (int i=0; i<3; i++) {
 			slide[i].update();
+			slide[i].saveImage(ofToString(i) + ".png");
+		}
 	}
 }
 
@@ -129,10 +147,7 @@ void testApp::update(){
 void testApp::customDraw(){
 	
 	ofPushMatrix();
-	ofRotate(rotation.y, 0, 1, 0);
-	ofRotate(rotation.x, 1, 0, 0);
-	ofRotate(rotation.z, 0, 0, 1);
-	ofTranslate(offset);
+	glMultMatrixf(transform.getPtr());
 	
 	camera.draw();
 	projector.draw();
@@ -164,6 +179,7 @@ void testApp::keyPressed(int key){
 			
 		case 'c':
 			cam->toggleCursorDraw();
+			break;
 			
 		case OF_KEY_LEFT:
 			rotation.y -= 1;
@@ -187,6 +203,8 @@ void testApp::keyPressed(int key){
 		default:
 			break;
 	}
+	
+	this->makeTransform();
 	
 }
 

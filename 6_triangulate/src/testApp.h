@@ -13,6 +13,7 @@ public:
 	void setup();
 	
 	void load();
+	void makeTransform();
 	void triangulate();
 	void seperate();
 	
@@ -47,4 +48,6 @@ public:
 	ofVec3f offset;
 	ofVec3f rotation;
 	ofImage slide[3];
+	
+	ofMatrix4x4 transform;
 };
