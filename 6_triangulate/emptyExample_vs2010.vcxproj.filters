@@ -3,13 +3,31 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\testApp.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxGrabCam\src\ofxGrabCam.cpp">
+      <Filter>addons\ofxGrabCam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxTriangulate\src\ofxTriangulate.cpp">
+      <Filter>addons\ofxTriangulate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\testApp.h" />
+    <ClInclude Include="..\..\..\addons\ofxGrabCam\src\ofxGrabCam.h">
+      <Filter>addons\ofxGrabCam</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxTriangulate\src\ofxTriangulate.h">
+      <Filter>addons\ofxTriangulate</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="addons">
       <UniqueIdentifier>{1c52f653-215c-4234-bad9-79227a6d7ec4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxGrabCam">
+      <UniqueIdentifier>{b6a0eb03-8288-4a3f-846c-31b5b3def458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxTriangulate">
+      <UniqueIdentifier>{30ac5c7a-fbbb-49ff-8c5d-00887b55aad4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,30 +1,44 @@
 #include "testApp.h"
 
+void setDeviceProps(ofVideoGrabber & cam) {
+
+
+#ifdef TARGET_WIN32
+	videoInput & device = ((ofDirectShowGrabber*) &* cam.getGrabber())->getDevice();
+	int ID = 0;
+
+	device.setVideoSettingFilter(ID, device.propSharpness, 0);
+	
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	return;
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	device.setVideoSettingCamera(ID, device.propFocus, 0);
+	device.setVideoSettingCamera(ID, device.propExposure, -4);
+	device.setVideoSettingCamera(ID, device.propGain, 10);
+
+	
+#endif
+}
+
 //--------------------------------------------------------------
 void testApp::setup(){
 	ofSetVerticalSync(true);
 	ofEnableSmoothing();
+
+	rx.setup(5556);
+	tx.setup("localhost", 5555);
+
+	video.initGrabber(1280, 800, true);
+	setDeviceProps(video);
 	
 	payload.init(1024, 800);
 	data.init(payload);
-	this->load();
-	
-	gui.init();
-	gui.addInstructions();
-	gui.add(data.getCameraInProjector(), "Camera in projector");
-	gui.add(data.getProjectorInCamera(), "Projector in camera");
-	ofPtr<ofxCvGui::Panels::Node> nodepanel = gui.add(*this, "3D");
-	for (int i=0; i<3; i++) {
-		gui.add(slide[i], "Slide " + ofToString(i));
-	}
-
-	
-	this->cam = &(nodepanel->getCamera());
-	nodepanel->setGridScale(2.0f);
-	this->cam->setPosition(1.0f, 1.0f, 1.0f);
-	this->cam->lookAt(ofVec3f());
-	this->cam->setNearClip(0.01f);
-	this->cam->setFixUpwards(false);
 	
 	float fov = 83.0f;
 	float throwratio = tan(fov / 2.0f) * 2.0f;
@@ -74,7 +88,7 @@ void testApp::setup(){
 	projector.setProjection(pP);
 	
 	for (int i=0; i<3; i++) {
-		slide[i].allocate(data.getDataSet().getPayloadWidth(), data.getDataSet().getPayloadHeight(), OF_IMAGE_GRAYSCALE);
+		slide[i].allocate(payload.getWidth(), payload.getHeight(), OF_IMAGE_GRAYSCALE);
 	}
 	
 	this->threshold = 1e11;
@@ -85,16 +99,13 @@ void testApp::setup(){
 	this->makeTransform();
 	
 	this->seperate();
-}
 
-//--------------------------------------------------------------
-void testApp::load(){
-	data.loadDataSet("scan");
+	
+	data.setThreshold(10);
 }
 
 //--------------------------------------------------------------
 void testApp::triangulate(){
-	data.setThreshold(10);
 	ofxTriangulate::Triangulate(data.getDataSet(), camera, projector, mesh, threshold);
 	cout << mesh.getVertices().size() << " found" << endl;
 }
@@ -130,9 +141,24 @@ void testApp::seperate(){
 			}
 		}
 		
+		ofImage rgb;
+		int width = slide[0].getWidth();
+		int height = slide[0].getHeight();
+		rgb.allocate(width, height, OF_IMAGE_COLOR);
 		for (int i=0; i<3; i++) {
 			slide[i].update();
-			slide[i].saveImage(ofToString(i) + ".png");
+
+			unsigned char * in = slide[i].getPixels();
+			unsigned char * out = rgb.getPixels();
+
+			for (int p=0; p<width*height; p++)
+			{
+				memset(out, *in, 3);
+				in++;
+				out+=3;
+			}
+
+			rgb.saveImage(ofToString(i) + ".png");
 		}
 	}
 }
@@ -140,7 +166,37 @@ void testApp::seperate(){
 
 //--------------------------------------------------------------
 void testApp::update(){
-	
+
+	video.update();
+
+	while (rx.hasWaitingMessages()) {
+		ofxOscMessage msg;
+		rx.getNextMessage(&msg);
+
+		cout << msg.getAddress() << endl;
+
+		if (msg.getAddress() == "/capture")
+		{
+			data << video;
+			if (data.hasData()) {
+				triangulate();
+				seperate();
+				data.saveDataSet("scan");
+				ofxOscMessage cheer;
+				cheer.setAddress("/complete");
+				tx.sendMessage(cheer);
+			} else {
+				ofxOscMessage request;
+				request.setAddress("/request");
+				tx.sendMessage(request);
+			}
+		}
+
+		if (msg.getAddress() == "/clear")
+		{
+			data.reset();
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -160,52 +216,50 @@ void testApp::customDraw(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
-	ofxCvGui::AssetRegister.drawText("threshold = " + ofToString(threshold), 20, 300);
+	video.draw(0, 0);
+
+	ofDrawBitmapString("frame : " + ofToString(data.getFrame()) + "/" + ofToString(data.getFrameCount()), 20, 20);
+	ofPushStyle();
+	ofEnableAlphaBlending();
+	ofSetColor(255, 255, 255, 100);
+	data.draw(50, 100, 300, 200);
+	data.getCameraInProjector().draw(400, 100, 300, 200);
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
 	
 	switch (key) {
-		case 'l':
-			load();
-			break;
 		case 't':
 			triangulate();
 			break;
 		case 's':
 			seperate();
 			break;
-			
-		case 'c':
-			cam->toggleCursorDraw();
+
+		case 'v':
+			video.videoSettings();
 			break;
-			
-		case OF_KEY_LEFT:
-			rotation.y -= 1;
-			break;
-		case OF_KEY_RIGHT:
-			rotation.y += 1;
+		
+		case OF_KEY_UP:
+			data.setThreshold(data.getThreshold()+1);
+			cout << "Threshold: " << (int)data.getThreshold() << endl;
 			break;
 		case OF_KEY_DOWN:
-			rotation.x -= 1;
+			data.setThreshold(data.getThreshold()-1);
+			cout << "Threshold: " << (int)data.getThreshold() << endl;
 			break;
-		case OF_KEY_UP:
-			rotation.x += 1;
-			break;
+
 		case 'a':
-			rotation.z -= 1;
+			data.saveDataSet("scan");
 			break;
-		case 'z':
-			rotation.z += 1;
-			break;
-			
+
 		default:
 			break;
 	}
 	
 	this->makeTransform();
-	
 }
 
 //--------------------------------------------------------------
