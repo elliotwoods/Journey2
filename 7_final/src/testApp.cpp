@@ -8,6 +8,7 @@ void setDeviceProps(ofVideoGrabber & cam) {
 	int ID = 0;
 
 	device.setVideoSettingFilter(ID, device.propSharpness, 0);
+	device.setVideoSettingCamera(ID, device.propFocus, 0);
 	
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -18,7 +19,6 @@ void setDeviceProps(ofVideoGrabber & cam) {
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	device.setVideoSettingCamera(ID, device.propFocus, 0);
 	device.setVideoSettingCamera(ID, device.propExposure, -4);
 	device.setVideoSettingCamera(ID, device.propGain, 10);
 
@@ -133,7 +133,7 @@ void testApp::seperate(){
 				ofVec3f xyz = mesh.getVertex(iPoint++) * transform;	
 				float z = xyz.z;
 				
-				float findex = ofMap(z, -0.03, -0.2, 0, 2) + 0.5f;
+				float findex = ofMap(z, -0.03, -0.25, 0, 2) + 0.5f;
 				unsigned int index = findex;
 				
 				if (index < 3)
