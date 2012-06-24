@@ -3,10 +3,12 @@
 #include "ofMain.h"
 #include "ofxPolyPlane.h"
 
-#define COUNT 4
+#define COUNT 3
 
 //max interval between changes per channel
 #define FILTER_TIME 1.0f
+#define FLICKER_TIME 0.5f
+
 #define FADE_COEFF 0.8f
 
 class testApp : public ofBaseApp{
@@ -31,11 +33,14 @@ public:
 	void save();
 	
 	void loadVideo(int layer);
+	void stopVideo(int layer);
 	
 	int offset;
 	ofSerial serial;
 	
+	float lastFlicker[COUNT];
 	float lastChange[COUNT];
+	bool flickering[COUNT];
 	unsigned char data[COUNT];
 	
 	ofVideoPlayer video[COUNT];
