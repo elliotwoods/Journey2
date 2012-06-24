@@ -15,6 +15,7 @@ public:
 	void makeTransform();
 	void triangulate();
 	void seperate();
+	void archive();
 	
 	void update();
 

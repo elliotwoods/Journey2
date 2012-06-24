@@ -122,7 +122,7 @@ void testApp::seperate(){
 				ofVec3f xyz = mesh.getVertex(iPoint++) * transform;	
 				float z = xyz.z;
 				
-				float findex = ofMap(z, -0.03, -0.2, 0, 2) + 0.5f;
+				float findex = ofMap(z, -0.03, -0.23, 0, 2) + 0.5f;
 				unsigned int index = findex;
 				
 				if (index < 3)
