@@ -165,6 +165,13 @@ void testApp::seperate(){
 
 
 //--------------------------------------------------------------
+void testApp::archive() {
+	for (int i=0; i<3; i++) {
+		ofFile(ofToString(i) + ".png").copyTo("archive\\" + ofToString(ofGetMonth()) + "-" + ofToString(ofGetDay()) + "-" + ofToString(ofGetElapsedTimef, 0) + " " + ofToString(i) + ".png");
+	}
+}
+
+//--------------------------------------------------------------
 void testApp::update(){
 
 	video.update();
@@ -186,6 +193,8 @@ void testApp::update(){
 					ofxOscMessage cheer;
 					cheer.setAddress("/complete");
 					tx.sendMessage(cheer);
+
+					archive();
 				} else {
 					ofxOscMessage request;
 					request.setAddress("/request");
